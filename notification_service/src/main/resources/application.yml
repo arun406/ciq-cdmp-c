@@ -1,0 +1,90 @@
+server:
+  port: '3030'
+spring:
+  application:
+    name: notification_service
+  data:
+    mongodb:
+      database: notifications
+      uri: mongodb+srv://admin:admin%40123@aruncluster.70orz.mongodb.net/?retryWrites=true&w=majority
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  kafka:
+    properties:
+      sasl:
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule   required
+            username='7I2IL2UTBVQG4MN7'   password='xdCW7HbRg0JEOOsSJMm/ljYy08JebRYTCrx9E2BfMv6XnFRw7GNTZIAE5B3uBbsA';
+        mechanism: PLAIN
+      session:
+        timeout:
+          ms: '45000'
+      security:
+        protocol: SASL_SSL
+      bootstrap:
+        servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
+  cloud:
+    function:
+      definition: processPlanConsumer
+    stream:
+      function:
+        bindings:
+          processPlanConsumer-in-0: processPlan
+      bindings:
+        processPlan:
+          destination: process-plan-instance-out-0
+          group: notification.process.plan.group.0
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.repository.query: DEBUG
+    com.aktimetrix: DEBUG
+    org.springframework.integration.sftp: TRACE
+
+aktimetrix:
+  consumer:
+    plan:
+      enabled: true
+ciq:
+  cdmpIdentifier: "AKM"
+  cdmpType: C
+  phase-number: 1
+  message-version: 12
+  email-id: ak.kandakatla@gmail.com
+  timestamp-format: yyyy-MM-ddThh:mi:ss
+  transfer-mode: ASCII
+  temporary-file-suffix: ".tmp"
+  single-or-multiple-indicator: S
+  file-format: "${date}${sequenceNumber}_${singleOrMultiple}_${messageType}_${messageVersion}_${cdmpIdentifier}_${forwarderIdentifier}_${carrierCode}_${messageReference}"
+  cdmpc:
+    encore:
+      reference-data:
+        base-url: http://localhost:6060
+        routes: /reference-data/encore/routes
+
+      default-line-offsets:
+        FWB: 365
+        LAT: 360
+        RCS: 120
+        DEP: 60
+        ARR: 60
+        AWR: 0
+        RCF: 240
+        NFD: 240
+        AWD: 240
+        DLV: 4320
+        RCF-T: 45
+        TFD-T: 0
+        ARR-T: 40
+        RCT-T: 0
+        DEP-T: 60
+notifiers:
+  sftp:
+    host: 172.20.10.2
+    port: 21
+    user: admin
+    password: admin
+    use-temporary-file-name: true
+    temporary-file-suffix: .tmp
+

@@ -1,0 +1,92 @@
+server:
+  port: '6060'
+spring:
+  application:
+    name: meter
+  data:
+    mongodb:
+      database: meter
+      uri: mongodb+srv://admin:admin%40123@aruncluster.70orz.mongodb.net/?retryWrites=true&w=majority
+  kafka:
+    properties:
+      sasl:
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule   required
+            username='7I2IL2UTBVQG4MN7'   password='xdCW7HbRg0JEOOsSJMm/ljYy08JebRYTCrx9E2BfMv6XnFRw7GNTZIAE5B3uBbsA';
+        mechanism: PLAIN
+      session:
+        timeout:
+          ms: '45000'
+      security:
+        protocol: SASL_SSL
+      bootstrap:
+        servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
+  cloud:
+    stream:
+      function:
+        bindings:
+          measure-in-0: step-event-processor
+        definition: measure
+      bindings:
+        step-event-processor:
+          group: meter.step.group.0
+          destination: step-instance-out-0
+      source: measurement-instance
+      kafka:
+        bindings:
+          measurement-instance-out-0:
+            producer:
+              configuration:
+                "[key.serializer]": org.apache.kafka.common.serialization.StringSerializer
+          step-event-processor:
+            consumer:
+              enableDlq: true
+              dlqName: input-topic-dlq
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.repository.query: DEBUG
+    com.aktimetrix.core: DEBUG
+
+
+aktimetrix:
+  consumer:
+    process:
+      enabled: false
+    step:
+      enabled: true
+    measurement:
+      enabled: false
+  meter:
+    process-code: DEFAULT
+    process-type: DEFAULT
+
+ciq:
+  cdmpIdentifier: "XX"
+  cdmpType: C
+  phase-number: 1
+  message-version: 12
+  email-id: ak.kandakatla@gmail.com
+  timestamp-format: yyyy-MM-ddThh:mi:ss
+  transfer-mode: ASCII
+  temporary-file-suffix: ".tmp"
+  single-or-multiple-indicator: S
+  file-format: "${date}${sequenceNumber}_${singleOrMultiple}_${messageType}_${messageVersion}_${cdmpIdentifier}_${forwarderIdentifier}_${carrierCode}_${messageReference}"
+  cdmpc:
+    encore:
+      default-line-offsets:
+        FWB: 365
+        LAT: 360
+        RCS: 120
+        DEP: 60
+        ARR: 60
+        AWR: 0
+        RCF: 240
+        NFD: 240
+        AWD: 240
+        DLV: 4320
+        RCF-T: 45
+        TFD-T: 0
+        ARR-T: 40
+        RCT-T: 0
+        DEP-T: 60

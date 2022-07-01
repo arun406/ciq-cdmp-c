@@ -1,0 +1,1 @@
+${canMessageDTO.messageType},${canMessageDTO.messageVersion},${canMessageDTO.cdmpIdentifier},${canMessageDTO.messageReference},${canMessageDTO.messageTimestamp},${canMessageDTO.airWaybillPrefix},${canMessageDTO.airWaybillNumber},${canMessageDTO.messageCounter}
