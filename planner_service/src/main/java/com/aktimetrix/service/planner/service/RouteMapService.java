@@ -4,18 +4,18 @@ import com.aktimetrix.core.api.Context;
 import com.aktimetrix.core.model.*;
 import com.aktimetrix.core.service.MeasurementInstanceService;
 import com.aktimetrix.core.service.ProcessInstanceService;
-import com.aktimetrix.core.service.StepInstanceService;
 import com.aktimetrix.service.planner.Constants;
 import com.aktimetrix.service.planner.api.Planner;
+import com.aktimetrix.service.planner.exception.ProcessPlanNotExistsException;
 import com.aktimetrix.service.planner.transferobjects.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ComparisonChain;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -29,35 +29,26 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Service
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class RouteMapService {
     public static final String RFS_AIRCRAFT_CATEGORY = "RFS";
-    public static final List<String> METADATA_PROPERTIES = Arrays.asList("origin", "destination", "forwarderCode", "reservationPieces", "reservationWeight", "reservationVolume", "reservationWeightUnit", "reservationVolumeUnit");
-    @Autowired
-    private RestTemplate restTemplate;
+    public static final List<String> METADATA_PROPERTIES = Arrays.asList("origin", "destination", "forwarderCode",
+            "reservationPieces", "reservationWeight", "reservationVolume", "reservationWeightUnit",
+            "reservationVolumeUnit");
 
-    @Autowired
-    private Planner planner;
-
-    @Autowired
-    private MeasurementInstanceService measurementInstanceService;
+    final private RestTemplate restTemplate;
+    final private Planner planner;
+    final private MeasurementInstanceService measurementInstanceService;
+    final protected ProcessInstanceService processInstanceService;
+    final private ObjectMapper objectMapper;
 
     @Value("${ciq.cdmpc.encore.reference-data.base-url:http://localhost:6060}")
     private String referenceDataServiceBaseUrl;
 
     @Value("${ciq.cdmpc.encore.reference-data.routes:/reference-data/encore/routes}")
     private String routesEndpoint;
-
-    @Autowired
-    protected ProcessInstanceService processInstanceService;
-
-    @Autowired
-    protected StepInstanceService stepInstanceService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
     public static final String YYYY_MM_DD_T_HH_MM_SS = "yyyy-MM-dd'T'HH:mm:ss";
 
     /**
@@ -220,8 +211,16 @@ public class RouteMapService {
         processInstance.getMetadata().put("flightSpecific", "F");
     }
 
+    /**
+     * check all measurements are captured or not
+     *
+     * @param tenantKey
+     * @param processInstance
+     * @param planMeasurementType
+     * @return
+     */
     public boolean isAllMeasurementsCaptured(String tenantKey, ProcessInstance processInstance, String planMeasurementType) {
-        return measurementInstanceService.isAllMeasurementsCaptured(tenantKey, processInstance, Constants.PLAN_MEASUREMENT_TYPE);
+        return measurementInstanceService.isAllMeasurementsCaptured(tenantKey, processInstance, planMeasurementType);
     }
 
     public String getDirectTruckingIndicator(ProcessInstance processInstance) {
@@ -266,7 +265,8 @@ public class RouteMapService {
      * @param processInstance
      */
     public void createCompletePlan(Context context, ProcessInstance processInstance) {
-        boolean allMeasurementsCaptured = this.isAllMeasurementsCaptured(context.getTenant(), processInstance, com.aktimetrix.service.planner.Constants.PLAN_MEASUREMENT_TYPE);
+        boolean allMeasurementsCaptured =
+                this.isAllMeasurementsCaptured(context.getTenant(), processInstance, Constants.PLAN_MEASUREMENT_TYPE);
         log.debug("all measurements captured : {}", allMeasurementsCaptured);
         if (allMeasurementsCaptured) createProcessPlanInstance(context, processInstance);
     }
@@ -520,8 +520,7 @@ public class RouteMapService {
         printMeasurements(newStepsWithPlannedMeasurements);
 
         // update step status
-        updatedStepStatus(tenant, processInstance.getId(),
-                LocalDateTime.now(ZoneOffset.UTC), newStepsWithPlannedMeasurements, oldStepWithPlannedMeasurements);
+        updatedStepStatus(tenant, newStepsWithPlannedMeasurements, oldStepWithPlannedMeasurements);
         plan.setStepPlanInstances(newStepsWithPlannedMeasurements);
         boolean rmpSent = sendRMP(plan);
         plan.setRmpSent(rmpSent);
@@ -573,8 +572,7 @@ public class RouteMapService {
         printMeasurements(newStepsWithPlannedMeasurements);
 
         // update step status
-        updatedStepStatus(tenant, processInstance.getId(),
-                LocalDateTime.now(ZoneOffset.UTC), newStepsWithPlannedMeasurements, oldStepWithPlannedMeasurements);
+        updatedStepStatus(tenant, newStepsWithPlannedMeasurements, oldStepWithPlannedMeasurements);
         plan.setStepPlanInstances(newStepsWithPlannedMeasurements);
         boolean rmpSent = sendRMP(plan);
         plan.setRmpSent(rmpSent);
@@ -602,14 +600,15 @@ public class RouteMapService {
     private ArrayListMultimap<String, StepPlanInstance> getStepPlanInstances(String tenant, ProcessInstance processInstance) {
         String processInstanceId = processInstance.getId();
         List<MeasurementInstance> plannedMeasurements = this.measurementInstanceService.getPlannedMeasurements(tenant, processInstanceId);
-        List<StepPlanInstance> newPlanInstances = new ArrayList<>();
         ArrayListMultimap<String, StepPlanInstance> multimap = ArrayListMultimap.create();
 
         Map<String, Map<String, List<MeasurementInstance>>> collect = plannedMeasurements.stream()
                 .collect(Collectors.groupingBy(MeasurementInstance::getStepCode, Collectors.groupingBy(MeasurementInstance::getStepInstanceId)));
 
-        Map<String, List<StepPlanInstance>> stepPlanInstances = collect.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(),
-                e -> e.getValue().entrySet().stream().map(e1 -> new StepPlanInstance(e.getKey(), e1.getKey(), processInstanceId, e1.getValue())).collect(Collectors.toList())));
+        Map<String, List<StepPlanInstance>> stepPlanInstances = collect.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().entrySet().stream()
+                        .map(e1 -> new StepPlanInstance(e.getKey(), e1.getKey(), processInstanceId, e1.getValue()))
+                        .collect(Collectors.toList())));
 
         stepPlanInstances = stepPlanInstances.entrySet().stream()/*.filter(e -> Arrays.asList("FWB", "LAT", "RCS", "NFD", "AWD", "DLV").contains(e.getKey()))*/
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> {
@@ -649,13 +648,10 @@ public class RouteMapService {
      * in case of Plan Update updating the step plan status.
      *
      * @param tenant
-     * @param processInstanceId
-     * @param timestamp
      * @param newStepsWithPlannedMeasurements
      * @param oldStepsWithPlannedMeasurements
      */
-    private void updatedStepStatus(String tenant, String processInstanceId,
-                                   LocalDateTime timestamp, ArrayListMultimap<String, StepPlanInstance> newStepsWithPlannedMeasurements,
+    private void updatedStepStatus(String tenant, ArrayListMultimap<String, StepPlanInstance> newStepsWithPlannedMeasurements,
                                    ArrayListMultimap<String, StepPlanInstance> oldStepsWithPlannedMeasurements) {
         for (Map.Entry<String, StepPlanInstance> entry : newStepsWithPlannedMeasurements.entries()) {
             String stepCode = entry.getKey();
@@ -767,6 +763,21 @@ public class RouteMapService {
         return false;
     }
 
+    /**
+     * returns the active plan status
+     *
+     * @param tenant
+     * @param entityId
+     * @param entityType
+     * @return
+     */
+    public String getRouteMapStatus(String tenant, String entityId, String entityType) throws ProcessPlanNotExistsException {
+        List<ProcessPlanInstance> activeProcessPlanInstances = this.planner.getActivePlans(tenant, entityId, entityType);
+        if (activeProcessPlanInstances != null && !activeProcessPlanInstances.isEmpty()) {
+            return activeProcessPlanInstances.get(0).getStatus();
+        }
+        throw new ProcessPlanNotExistsException("");
+    }
 
     /**
      * Itinerary predicates

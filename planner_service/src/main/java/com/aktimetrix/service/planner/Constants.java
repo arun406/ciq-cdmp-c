@@ -18,4 +18,6 @@ public class Constants {
     public static final String STATUS_BASELINE = "Baseline";
     public static final String STATUS_REPLAN = "Replan";
     public static final String PLAN_EVENT = "Plan_Event";
+    public static final String STATUS_LIVE = "Live";
+    public static final String ACTUAL_MEASUREMENT_TYPE = "A";
 }

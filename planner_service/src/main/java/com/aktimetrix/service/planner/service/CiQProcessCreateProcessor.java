@@ -4,12 +4,14 @@ import com.aktimetrix.core.api.Constants;
 import com.aktimetrix.core.api.Context;
 import com.aktimetrix.core.model.ProcessInstance;
 import com.aktimetrix.core.service.AbstractProcessInstanceProcessor;
-import com.aktimetrix.core.stereotypes.ProcessHandler;
+import com.aktimetrix.core.service.ProcessInstanceService;
+import com.aktimetrix.core.service.RegistryService;
+import com.aktimetrix.core.stereotypes.Processor;
 import com.aktimetrix.service.planner.transferobjects.Itinerary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +25,16 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@ProcessHandler(processCode = Constants.PROCESS_INSTANCE_CREATE,
-        processType = Constants.PROCESS_INSTANCE_TYPE,
-        version = Constants.DEFAULT_VERSION)
+@Processor(processCode = Constants.PROCESS_INSTANCE_CREATE, processType = Constants.PROCESS_INSTANCE_TYPE)
 public class CiQProcessCreateProcessor extends AbstractProcessInstanceProcessor {
 
-    @Autowired
-    private RouteMapService routeMapService;
+    private final RouteMapService routeMapService;
+
+    public CiQProcessCreateProcessor(RegistryService registryService, ProcessInstanceService processInstanceService,
+                                     ObjectMapper objectMapper, RouteMapService routeMapService) {
+        super(registryService, processInstanceService, objectMapper);
+        this.routeMapService = routeMapService;
+    }
 
     @Value("${tenant.airlineCode:}")
     private String airlineCode;
@@ -43,7 +48,7 @@ public class CiQProcessCreateProcessor extends AbstractProcessInstanceProcessor 
     protected void doProcess(Context context) {
         // latest process instance
         ProcessInstance processInstance = context.getProcessInstance();
-        processInstance = processInstanceService.saveProcessInstance(processInstance); // local save
+        processInstance = this.processInstanceService.saveProcessInstance(processInstance); // local save
         log.debug("process instance is saved successfully in planner service.{}", processInstance.getId());
 
         // validate airline code
@@ -58,6 +63,12 @@ public class CiQProcessCreateProcessor extends AbstractProcessInstanceProcessor 
         }
     }
 
+    /**
+     * is valid itineraries exists
+     *
+     * @param processInstance
+     * @return
+     */
     private boolean isValidItinerariesExists(ProcessInstance processInstance) {
         List<Itinerary> itineraries;
         if (!(processInstance.getMetadata().get("itineraries") instanceof LinkedHashMap)) {
@@ -67,7 +78,7 @@ public class CiQProcessCreateProcessor extends AbstractProcessInstanceProcessor 
         LinkedHashMap<String, Object> itinerariesLL = (LinkedHashMap) processInstance.getMetadata().get("itineraries");
         try {
             String itinerariesStr = objectMapper.writeValueAsString(itinerariesLL);
-            itineraries = objectMapper.readValue(itinerariesStr, new TypeReference<>() {
+            itineraries = objectMapper.readValue(itinerariesStr, new TypeReference<List<Itinerary>>() {
             });
             log.debug("ciq airline code: {}", airlineCode);
             if (itineraries != null && !itineraries.isEmpty()) {

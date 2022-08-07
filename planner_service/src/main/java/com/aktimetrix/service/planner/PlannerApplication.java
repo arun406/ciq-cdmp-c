@@ -1,5 +1,6 @@
 package com.aktimetrix.service.planner;
 
+import com.aktimetrix.core.api.Constants;
 import com.aktimetrix.core.api.EventHandler;
 import com.aktimetrix.core.exception.EventHandlerNotFoundException;
 import com.aktimetrix.core.exception.MultipleEventHandlersFoundException;
@@ -7,7 +8,6 @@ import com.aktimetrix.core.service.RegistryService;
 import com.aktimetrix.core.transferobjects.Event;
 import com.aktimetrix.core.transferobjects.Measurement;
 import com.aktimetrix.core.transferobjects.ProcessInstanceDTO;
-import com.aktimetrix.service.planner.api.Planner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +24,6 @@ import java.util.function.Consumer;
 public class PlannerApplication {
 
     final private static Logger logger = LoggerFactory.getLogger(PlannerApplication.class.getName());
-
-    @Autowired
-    private Planner planner;
 
     @Autowired
     private RegistryService registryService;
@@ -68,16 +65,17 @@ public class PlannerApplication {
         };
     }
 
-   /* @Bean
-    @ConditionalOnProperty(value = "aktimetrix.consumer.plan.enabled", havingValue = "true", matchIfMissing = false)
-    public Consumer<Event<ProcessPlanDTO, Void>> planConsumer() {
+    @Bean
+    @ConditionalOnProperty(value = "aktimetrix.consumer.step.enabled", havingValue = "true", matchIfMissing = false)
+    public Consumer<Event<Measurement, Void>> stepConsumer() {
         return event -> {
+            logger.debug("event: {}", event);
             try {
-                EventHandler eventHandler = this.registryService.getEventHandler(event.getEventType(), event.getEventCode());
-                eventHandler.handle(event);
+                this.registryService.getEventHandler(Constants.STEP_EVENT, event.getEventCode())
+                        .handle(event);
             } catch (EventHandlerNotFoundException | MultipleEventHandlersFoundException e) {
-                logger.error(e.getLocalizedMessage(), e);
+                logger.error("Something happened bad. please contact system administrator.", e);
             }
         };
-    }*/
+    }
 }

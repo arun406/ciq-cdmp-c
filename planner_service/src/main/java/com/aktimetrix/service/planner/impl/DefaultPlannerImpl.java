@@ -5,9 +5,7 @@ import com.aktimetrix.core.model.ProcessPlanInstance;
 import com.aktimetrix.core.service.MeasurementInstanceService;
 import com.aktimetrix.service.planner.api.Planner;
 import com.aktimetrix.service.planner.service.PlannerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -16,14 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class DefaultPlannerImpl implements Planner {
-    final private static Logger logger = LoggerFactory.getLogger(DefaultPlannerImpl.class);
 
-    @Autowired
-    private PlannerService plannerService;
-
-    @Autowired
-    private MeasurementInstanceService measurementInstanceService;
+    final private PlannerService plannerService;
+    final private MeasurementInstanceService measurementInstanceService;
 
 
     @Override

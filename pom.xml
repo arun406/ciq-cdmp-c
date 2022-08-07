@@ -12,7 +12,7 @@
     <groupId>com.aktimetrix</groupId>
     <artifactId>cdmp-c</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>CDMP-C</name>
+    <name>ciq-cdmp-c</name>
     <description>CiQ CDMP-C implementation using aktimetrix</description>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -30,6 +30,7 @@
         <module>meter_service</module>
         <module>planner_service</module>
         <module>notification_service</module>
+        <module>ciq-cdmpc-events</module>
     </modules>
     <dependencyManagement>
         <dependencies>

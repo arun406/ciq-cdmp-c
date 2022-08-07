@@ -19,17 +19,8 @@ public class PlannerService {
      * @param plan
      */
     public ProcessPlanInstance save(String tenant, ProcessPlanInstance plan) {
+        plan.setTenant(tenant);
         return this.repository.save(plan);
-    }
-
-    /**
-     * @param tenant
-     * @param id
-     * @param activeIndicator
-     * @return
-     */
-    public ProcessPlanInstance getPlanByProcessId(String tenant, String id, String activeIndicator) {
-        return this.repository.findPlanByProcessInstanceIdAndActiveIndicator(tenant, id, activeIndicator);
     }
 
     /**
@@ -44,12 +35,43 @@ public class PlannerService {
         return this.repository.save(plan);
     }
 
+    /**
+     * @param tenant
+     * @param entityId
+     * @param entityType
+     * @param pageable
+     * @return
+     */
     public List<ProcessPlanInstance> getPlanByEntityIdAndEntityType(String tenant, String entityId, String entityType, PageRequest pageable) {
         return this.repository.findPlanByEntityIdAndEntityType(tenant, entityId, entityType, pageable);
     }
 
+    /**
+     * @param tenant
+     * @param processInstanceId
+     * @param isComplete
+     * @return
+     */
     public ProcessPlanInstance getPlan(String tenant, String processInstanceId, boolean isComplete) {
         return this.repository.findPlanByProcessInstanceIdAndCompleteIndicator(tenant, processInstanceId, isComplete ? "Y" : "N");
     }
 
+    /**
+     * @param tenant
+     * @param id
+     * @param activeIndicator
+     * @return
+     */
+    public ProcessPlanInstance getPlanByProcessId(String tenant, String id, String activeIndicator) {
+        return this.repository.findPlanByProcessInstanceIdAndActiveIndicator(tenant, id, activeIndicator);
+    }
+
+    /**
+     * @param tenant
+     * @param id
+     * @return
+     */
+    public List<ProcessPlanInstance> getPlanByProcessId(String tenant, String id) {
+        return this.repository.findPlanByProcessInstanceId(tenant, id);
+    }
 }

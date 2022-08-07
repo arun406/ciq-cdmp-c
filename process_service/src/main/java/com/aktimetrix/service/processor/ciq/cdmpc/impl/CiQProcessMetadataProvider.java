@@ -7,6 +7,7 @@ import com.aktimetrix.service.processor.ciq.cdmpc.event.transferobjects.SpecialH
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +41,9 @@ public class CiQProcessMetadataProvider implements MetadataProvider<Cargo> {
         metadata.put("documentNumber", cargo.getDocumentInfo().getAwbInfo().getDocumentPrefix() + "-" + cargo.getDocumentInfo().getAwbInfo().getDocumentNumber());
         metadata.put("shcs", cargo.getShcList().stream().map(SpecialHandling::getCode).collect(Collectors.joining("-")));
         metadata.put("reservationPieces", cargo.getQuantityInfo().get(0).getPiece());
-        metadata.put("reservationWeight", cargo.getQuantityInfo().get(0).getWeight().getValue());
+        metadata.put("reservationWeight", BigDecimal.valueOf(cargo.getQuantityInfo().get(0).getWeight().getValue()));
         metadata.put("reservationWeightUnit", cargo.getQuantityInfo().get(0).getWeight().getUnit().getCode());
-        metadata.put("reservationVolume", cargo.getQuantityInfo().get(0).getVolume().getValue());
+        metadata.put("reservationVolume", BigDecimal.valueOf(cargo.getQuantityInfo().get(0).getVolume().getValue()));
         metadata.put("reservationVolumeUnit", cargo.getQuantityInfo().get(0).getVolume().getUnit().getCode());
         metadata.put("forwarderCode", cargo.getDocumentInfo().getAwbInfo().getParticipant()
                 .stream().filter(p -> "AGT".equalsIgnoreCase(p.getType())).map(Participant::getIdentifier).collect(Collectors.joining()));

@@ -1,0 +1,37 @@
+{
+  "tenantKey": "XX",
+  "eventId": "51541182-81fa-4727-afd5-114acdf086b1",
+  "eventName": "cargo movement event",
+  "eventType": "FSU",
+  "eventCode": "FWB",
+  "eventTime": "2015-11-18T00:00:00.000+0200",
+  "eventUTCTime": "2015-11-18 00:00:00",
+  "source": "XX",
+  "entityId": "888-11111275",
+  "entityType": "cargo",
+  "entity": {
+    "airWaybillPrefix": "888",
+    "airWaybillSerialNumber": "11111275",
+    "origin": "DXB",
+    "destination": "BOM",
+    "quantity": {
+      "shipmentDescriptionCode": "T",
+      "pieces": 5,
+      "weightCode": "K",
+      "weight": 15.0,
+      "volumeCode": "CM",
+      "volume": 1.0
+    },
+    "flightIdentification": {
+      "carrierCode": "XX",
+      "flightNumber": "1234A",
+      "flightDate": "2021-06-25"
+    },
+    "agent": {
+      "name": "9EK",
+      "code": "9EK",
+      "place": "Dubai"
+    },
+    "SpecialHandlingCodes": []
+  }
+}

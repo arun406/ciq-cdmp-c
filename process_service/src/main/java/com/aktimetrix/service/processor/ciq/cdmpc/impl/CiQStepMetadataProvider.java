@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class CiQStepMetadataProvider implements MetadataProvider<Itinerary> {
         if (StringUtils.isNotEmpty(data.getTransportInfo().getExtensionNumber())) {
             flightNumber = flightNumber + data.getTransportInfo().getExtensionNumber();
         }
+        metadata.put("shipmentDescriptionCode", data.getQuantity().getShipmentDescriptionCode());
         metadata.put("flightNumber", flightNumber);
         metadata.put("carrier", data.getTransportInfo().getCarrier());
         metadata.put("flightDate", data.getDepartureDateTimeUTC().getEstimated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
@@ -39,10 +41,10 @@ public class CiQStepMetadataProvider implements MetadataProvider<Itinerary> {
         metadata.put("eta", data.getArrivalDateTimeUTC().getEstimated());
         metadata.put("ata", data.getArrivalDateTimeUTC().getActual());
         metadata.put("pieces", data.getQuantity().getPiece());
-        metadata.put("wt", data.getQuantity().getWeight().getValue());
+        metadata.put("wt", BigDecimal.valueOf(data.getQuantity().getWeight().getValue()));
         metadata.put("wtUnit", data.getQuantity().getWeight().getUnit().getCode());
         metadata.put("volUnit", data.getQuantity().getVolume().getUnit().getCode());
-        metadata.put("vol", data.getQuantity().getVolume().getValue());
+        metadata.put("vol", BigDecimal.valueOf(data.getQuantity().getVolume().getValue()));
         metadata.put("acCategory", data.getAircraftCategory());
         return metadata;
     }

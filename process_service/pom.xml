@@ -12,8 +12,8 @@
     <name>process_service</name>
     <description>Processor Application</description>
     <properties>
-        <java.version>11</java.version>
-        <spring-cloud.version>2021.0.0</spring-cloud.version>
+        <!--        <java.version>8</java.version>-->
+        <spring-cloud.version>2021.0.1</spring-cloud.version>
     </properties>
     <dependencies>
         <dependency>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-ext</artifactId>
-            <version>1.0.1</version>
+            <version>1.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>

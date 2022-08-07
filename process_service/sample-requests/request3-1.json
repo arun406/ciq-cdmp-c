@@ -7,7 +7,7 @@
   "eventTime": "2015-11-18T00:00:00.000+0200",
   "eventUTCTime": "2015-11-18 00:00:00",
   "source": "SC",
-  "entityId": "888-11111267",
+  "entityId": "888-11111270",
   "entityType": "cargo",
   "entity": {
     "cargoType": "AWB",
@@ -188,7 +188,7 @@
     ],
     "documentInfo": {
       "awbInfo": {
-        "documentNumber": "11111267",
+        "documentNumber": "11111270",
         "documentPrefix": "888",
         "documentType": "AWB",
         "eAWBIndicator": false,
