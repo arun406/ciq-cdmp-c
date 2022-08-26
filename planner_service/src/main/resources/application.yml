@@ -1,5 +1,5 @@
 server:
-  port: '2020'
+  port: ${SERVER_PORT:2020}
 spring:
   freemarker:
     template-loader-path: "classpath:/"
@@ -7,25 +7,18 @@ spring:
     name: planner
   data:
     mongodb:
-      database: planner
-      uri: mongodb+srv://admin:admin%40123@aruncluster.70orz.mongodb.net/?retryWrites=true&w=majority
+      database: ${DATABASE_NAME:planner}
+      uri: ${DATABASE_URI:}
   jackson:
     serialization:
       write-dates-as-timestamps: false
   kafka:
     properties:
-      sasl:
-        jaas:
-          config: org.apache.kafka.common.security.plain.PlainLoginModule   required
-            username='7I2IL2UTBVQG4MN7'   password='xdCW7HbRg0JEOOsSJMm/ljYy08JebRYTCrx9E2BfMv6XnFRw7GNTZIAE5B3uBbsA';
-        mechanism: PLAIN
       session:
         timeout:
           ms: '45000'
-      security:
-        protocol: SASL_SSL
       bootstrap:
-        servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
+        servers: ${KAFKA_BOOTSTRAP_SERVERS:}
   cloud:
     function:
       definition: stepConsumer;processConsumer;measurementConsumer
@@ -92,7 +85,6 @@ ciq:
       reference-data:
         base-url: http://localhost:6060
         routes: /reference-data/encore/routes
-
       default-line-offsets:
         FWB: 365
         LAT: 360

@@ -7,12 +7,11 @@
         <artifactId>cdmp-c</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>process_service</artifactId>
+    <artifactId>processor</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>process_service</name>
+    <name>processor</name>
     <description>Processor Application</description>
     <properties>
-        <!--        <java.version>8</java.version>-->
         <spring-cloud.version>2021.0.1</spring-cloud.version>
     </properties>
     <dependencies>
@@ -31,7 +30,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -46,22 +44,18 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-ext</artifactId>
-            <version>1.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
-            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -93,21 +87,23 @@
         <dependency>
             <groupId>com.aktimetrix</groupId>
             <artifactId>aktimetrix-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <image>
+                        <bindings>
+                            <binding>${basedir}/bindings/ca-certificates:/platform/bindings/ca-certificates</binding>
+                        </bindings>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -116,8 +112,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
-
 </project>

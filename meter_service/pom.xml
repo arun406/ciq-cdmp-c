@@ -7,19 +7,17 @@
         <artifactId>cdmp-c</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>meter_service</artifactId>
+    <artifactId>meter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>meter_service</name>
-    <description>Demo project for Spring Could steam</description>
+    <name>meter</name>
+    <description>Aktimetrix meter process</description>
     <properties>
-        <!--        <java.version>11</java.version>-->
         <spring-cloud.version>2021.0.1</spring-cloud.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.aktimetrix</groupId>
             <artifactId>aktimetrix-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -28,7 +26,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -51,12 +48,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>1.0.2</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -69,12 +60,9 @@
             <classifier>test-binder</classifier>
             <type>test-jar</type>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
-            <version>1.2</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -88,13 +76,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <image>
+                        <bindings>
+                            <binding>${basedir}/bindings/ca-certificates:/platform/bindings/ca-certificates</binding>
+                        </bindings>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

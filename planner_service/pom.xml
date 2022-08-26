@@ -3,18 +3,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.6</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>com.aktimetrix</groupId>
+        <artifactId>cdmp-c</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <groupId>com.aktimetrix</groupId>
-    <artifactId>planner_service</artifactId>
+    <artifactId>planner</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>planner_service</name>
-    <description>aktimetrix planner</description>
+    <name>planner</name>
+    <description>aktimetrix planner service</description>
     <properties>
-        <!--        <java.version>11</java.version>-->
         <spring-cloud.version>2021.0.1</spring-cloud.version>
     </properties>
     <dependencies>
@@ -25,10 +22,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-streams</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -45,6 +38,10 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -68,26 +65,18 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>
-                    <groupId>de.flapdoodle.embed</groupId>
-                    <artifactId>de.flapdoodle.embed.mongo</artifactId>
-                    <scope>test</scope>
-                </dependency>-->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
-            <version>1.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.aktimetrix</groupId>
             <artifactId>aktimetrix-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -106,7 +95,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.9</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -127,6 +115,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <image>
+                        <bindings>
+                            <binding>${basedir}/bindings/ca-certificates:/platform/bindings/ca-certificates</binding>
+                        </bindings>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
