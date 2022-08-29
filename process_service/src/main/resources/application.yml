@@ -5,7 +5,7 @@ spring:
     name: processor
   data:
     mongodb:
-      database: ${DATABASE_NAME:SVM_PROCESSOR}
+      database: ${DATABASE_NAME:processor}
       uri: ${DATABASE_URI:}
   jackson:
     serialization:

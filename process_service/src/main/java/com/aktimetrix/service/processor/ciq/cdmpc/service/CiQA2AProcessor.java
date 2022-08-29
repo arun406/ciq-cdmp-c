@@ -16,6 +16,8 @@ import com.aktimetrix.core.stereotypes.Processor;
 import com.aktimetrix.service.processor.ciq.cdmpc.event.transferobjects.Cargo;
 import com.aktimetrix.service.processor.ciq.cdmpc.event.transferobjects.Itinerary;
 import com.aktimetrix.service.processor.ciq.cdmpc.impl.CiQStepDefinitionProvider;
+import com.aktimetrix.service.processor.ciq.cdmpc.service.util.CargoUtilService;
+import com.aktimetrix.service.processor.ciq.cdmpc.service.util.ItineraryUtilService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,8 +42,8 @@ public class CiQA2AProcessor extends AbstractProcessor {
 
     public static final String DEP_T = "DEP-T";
     public static final String FUNCTIONAL_CTX_EXPORT = "E";
-    public static final String FUNTIONAL_CTX_IMPORT = "I";
-    public static final String FUNTIONAL_CTX_TRANSIT = "T";
+    public static final String FUNCTIONAL_CTX_IMPORT = "I";
+    public static final String FUNCTIONAL_CTX_TRANSIT = "T";
 
     public CiQA2AProcessor() {
         super();
@@ -192,9 +194,9 @@ public class CiQA2AProcessor extends AbstractProcessor {
         Map<String, Object> metadata = stepInstance.getMetadata();
         if (StringUtils.equalsIgnoreCase(FUNCTIONAL_CTX_EXPORT, stepInstance.getFunctionalCtx())) {
             return (String) metadata.get("boardPoint");
-        } else if (StringUtils.equalsIgnoreCase(FUNTIONAL_CTX_IMPORT, stepInstance.getFunctionalCtx())) {
+        } else if (StringUtils.equalsIgnoreCase(FUNCTIONAL_CTX_IMPORT, stepInstance.getFunctionalCtx())) {
             return ((String) metadata.get("offPoint"));
-        } else if (StringUtils.equalsIgnoreCase(FUNTIONAL_CTX_TRANSIT, stepInstance.getFunctionalCtx())) {
+        } else if (StringUtils.equalsIgnoreCase(FUNCTIONAL_CTX_TRANSIT, stepInstance.getFunctionalCtx())) {
             if (DEP_T.equals(stepInstance.getStepCode())) {
                 return (String) metadata.get("boardPoint");
             } else {
@@ -221,6 +223,7 @@ public class CiQA2AProcessor extends AbstractProcessor {
         List<ProcessInstance> processInstances = super.processInstanceService.getProcessInstances(tenant,
                 definition.getProcessType(), definition.getProcessCode(), entityType, entityId);
 
+        // when its new process instance
         if (processInstances == null || processInstances.isEmpty()) {
             return super.createProcessInstance(context, definition, entityType, entityId);
         }

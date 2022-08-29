@@ -29,9 +29,11 @@ public class Line {
     private String FWB;
     private String LAT;
     private String RCS;
+    private String FOW;
     private String DEP;
     private String ARR;
     private String AWR;
+    private String FIW;
     private String RCF;
     private String NFD;
     private String AWD;

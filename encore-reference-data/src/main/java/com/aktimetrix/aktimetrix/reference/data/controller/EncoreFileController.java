@@ -4,7 +4,7 @@ import com.aktimetrix.aktimetrix.reference.data.config.S3StorageProperties;
 import com.aktimetrix.aktimetrix.reference.data.dto.*;
 import com.aktimetrix.aktimetrix.reference.data.exception.EncoreFileUploadException;
 import com.aktimetrix.aktimetrix.reference.data.service.*;
-import com.opencsv.CSVReader;
+import com.aktimetrix.core.service.S3StorageService;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -43,8 +43,6 @@ public class EncoreFileController {
      */
     @PostMapping("{type}/actions/upload")
     public UploadFileResponse uploadFile(@PathVariable String type, @RequestParam("file") MultipartFile file) throws EncoreFileUploadException {
-        CSVReader reader = null;
-
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
         // Check if the file's name contains invalid characters
@@ -93,12 +91,7 @@ public class EncoreFileController {
             log.error(e.getMessage(), e);
             throw new EncoreFileUploadException(e);
         } finally {
-            try {
-                EncoreFileParserService.closeReader(reader);
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-                throw new EncoreFileUploadException(e);
-            }
+
         }
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("encore/actions/download/")

@@ -12,6 +12,7 @@ import java.util.Map;
  * @author Arun.Kandakatla
  */
 public class CiQMessage extends GenericMessage<File> {
+
     public CiQMessage(File payload) {
         super(payload);
     }

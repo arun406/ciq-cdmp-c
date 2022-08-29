@@ -31,8 +31,7 @@
         <module>meter_service</module>
         <module>planner_service</module>
         <module>notification_service</module>
-        <module>aktimetrix-reference-data</module>
-        <!--        <module>ciq-cdmpc-events</module>-->
+        <module>encore-reference-data</module>
     </modules>
     <dependencyManagement>
         <dependencies>

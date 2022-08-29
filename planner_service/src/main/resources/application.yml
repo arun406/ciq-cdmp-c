@@ -58,16 +58,16 @@ logging:
 aktimetrix:
   consumer:
     plan:
-      enabled: false
+      enabled: true
     process:
-      enabled: false
+      enabled: true
     step:
-      enabled: false
+      enabled: true
     measurement:
       enabled: true
 tenant:
   code: "XX"
-  airlinecode:  "XX"
+  airlinecode: "XX"
 ciq:
   airlineCode: "XX"
   cdmpIdentifier: "XX"

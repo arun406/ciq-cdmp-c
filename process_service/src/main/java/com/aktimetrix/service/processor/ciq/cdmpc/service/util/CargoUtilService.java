@@ -1,4 +1,4 @@
-package com.aktimetrix.service.processor.ciq.cdmpc.service;
+package com.aktimetrix.service.processor.ciq.cdmpc.service.util;
 
 import com.aktimetrix.core.api.Constants;
 import com.aktimetrix.core.api.Context;

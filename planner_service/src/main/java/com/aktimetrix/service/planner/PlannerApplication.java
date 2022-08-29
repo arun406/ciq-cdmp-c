@@ -42,6 +42,7 @@ public class PlannerApplication {
             logger.debug("process event received {} from tenant {}", dto, tenantKey);
 
             try {
+                //
                 EventHandler eventHandler = this.registryService.getEventHandler(event.getEventType(), event.getEventCode());
                 eventHandler.handle(event);
             } catch (EventHandlerNotFoundException | MultipleEventHandlersFoundException e) {

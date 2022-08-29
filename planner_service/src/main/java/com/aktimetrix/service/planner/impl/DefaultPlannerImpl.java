@@ -52,7 +52,7 @@ public class DefaultPlannerImpl implements Planner {
     public List<ProcessPlanInstance> getActivePlans(String tenant, String entityId, String entityType) {
         Sort sort = Sort.by(Sort.Direction.DESC, "version");
         PageRequest pageable = PageRequest.of(0, 1, sort);
-        return plannerService.getPlanByEntityIdAndEntityType(tenant, entityId, entityType, pageable);
+        return this.plannerService.getPlanByEntityIdAndEntityType(tenant, entityId, entityType, pageable);
     }
 
     @Override

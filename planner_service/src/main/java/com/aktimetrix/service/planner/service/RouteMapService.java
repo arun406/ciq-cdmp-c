@@ -220,9 +220,15 @@ public class RouteMapService {
      * @return
      */
     public boolean isAllMeasurementsCaptured(String tenantKey, ProcessInstance processInstance, String planMeasurementType) {
-        return measurementInstanceService.isAllMeasurementsCaptured(tenantKey, processInstance, planMeasurementType);
+        return this.measurementInstanceService.isAllMeasurementsCaptured(tenantKey, processInstance, planMeasurementType);
     }
 
+    /**
+     * returns the Direct Trucking Indicator
+     *
+     * @param processInstance
+     * @return
+     */
     public String getDirectTruckingIndicator(ProcessInstance processInstance) {
         String directTruckingIndicator = "N";
         List<Itinerary> itineraries = new ArrayList<>();
@@ -272,6 +278,25 @@ public class RouteMapService {
     }
 
     /**
+     * Creates a new Plan Object or returns and existing incomplete plan object
+     *
+     * @param context
+     * @param processInstance
+     * @return
+     */
+    private ProcessPlanInstance getIncompletePlan(Context context, ProcessInstance processInstance) {
+        return this.planner.getIncompletePlan(context.getTenant(), processInstance.getId());
+    }
+
+    private ProcessPlanInstance getPreviousPlan(String tenant, String entityType, String entityId) {
+        List<ProcessPlanInstance> activeProcessPlanInstances = this.planner.getActivePlans(tenant, entityId, entityType);
+        if (activeProcessPlanInstances == null || activeProcessPlanInstances.isEmpty()) {
+            return null;
+        }
+        return activeProcessPlanInstances.get(0);
+    }
+
+    /**
      * Create or update the plan in incomplete status
      *
      * @param context
@@ -281,7 +306,7 @@ public class RouteMapService {
         // create or update existing incomplete plan
         ProcessPlanInstance plan = getIncompletePlan(context, processInstance);
         if (plan == null) {
-            plan = getProcessPlanInstance(processInstance, context, 1);
+            plan = createProcessPlanInstance(processInstance, context, 1);
             log.debug("plan is created as :{}", plan);
         }
         String shipmentIndicator = this.getShipmentIndicator(processInstance);
@@ -291,58 +316,59 @@ public class RouteMapService {
         log.debug("plan id {}'s status is {} and version is {}", plan.getId(), plan.getStatus(), plan.getVersion());
     }
 
+
+    /**
+     * @param context
+     * @param processInstance
+     */
     private void createProcessPlanInstance(Context context, ProcessInstance processInstance) {
+        int version = 1;
+        String status = com.aktimetrix.service.planner.Constants.STATUS_ORIGINAL;
         log.debug("check any incomplete incompletePlan exists for the process instance id: {}", processInstance.getId());
         ProcessPlanInstance incompletePlan = getIncompletePlan(context, processInstance);
         if (incompletePlan != null)
             log.debug("incompletePlan id {}'s status is {} and version is {}", incompletePlan.getId(), incompletePlan.getStatus(), incompletePlan.getVersion());
-        int version = 1;
         String shipmentIndicator = getShipmentIndicator(processInstance);
-        // is all measurements received from meter service for all step instances of a process instance
-        // once all planned measurements are received perform the sequence check.
         //check any previous incompletePlan exists for entity id and entity type which is in original status
         log.debug("checking any previous incompletePlan exists for the entity ");
         ProcessPlanInstance previousPlan = getPreviousPlan(context.getTenant(), processInstance.getEntityId(), processInstance.getEntityType());
         log.debug("previous route map : {}", previousPlan);
         if (previousPlan != null) {
-            updateCompletePlan(context, processInstance, incompletePlan, shipmentIndicator, previousPlan);
-            return;
+            final boolean completePlan = updateCompletePlan(context, processInstance, shipmentIndicator, previousPlan);
+            if (completePlan) {
+                // previous rm exists
+                version = previousPlan.getVersion() + 1;
+                if (incompletePlan != null) {
+                    status = previousPlan.getStatus();
+                }
+            }
         }
         log.debug("creating a new complete incompletePlan with version and incompletePlan number as 1");
         if (incompletePlan == null) {
-            incompletePlan = getProcessPlanInstance(processInstance, context, 1);
+            incompletePlan = createProcessPlanInstance(processInstance, context, version);
         } else {
-            incompletePlan.setStatus(com.aktimetrix.service.planner.Constants.STATUS_ORIGINAL);
+            incompletePlan.setVersion(version);
+            incompletePlan.setPlanNumber(version);
+            incompletePlan.setStatus(status);
             incompletePlan.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
         }
         ProcessPlanInstance plan = createPlan(context.getTenant(), incompletePlan, shipmentIndicator, context.getProcessInstance());
         context.setProcessPlanInstance(plan);
     }
 
+
     /**
-     * Creates a new Plan Object or returns and existing incomplete plan object
+     * Update the existing plan or cancels the existing plan or recreate re-plan
      *
      * @param context
-     * @param processInstance
+     * @param currentProcessInstance
+     * @param shipmentIndicator
+     * @param previousPlan
      * @return
      */
-    private ProcessPlanInstance getIncompletePlan(Context context, ProcessInstance processInstance) {
-        return planner.getIncompletePlan(context.getTenant(), processInstance.getId());
-    }
+    private boolean updateCompletePlan(Context context, ProcessInstance currentProcessInstance,
+                                       String shipmentIndicator, ProcessPlanInstance previousPlan) {
 
-    private ProcessPlanInstance getPreviousPlan(String tenant, String entityType, String entityId) {
-        List<ProcessPlanInstance> activeProcessPlanInstances = this.planner.getActivePlans(tenant, entityId, entityType);
-        if (activeProcessPlanInstances != null && !activeProcessPlanInstances.isEmpty())
-            return activeProcessPlanInstances.get(0);
-        else
-            return null;
-    }
-
-    private void updateCompletePlan(Context context, ProcessInstance currentProcessInstance, ProcessPlanInstance incompletePlan,
-                                    String shipmentIndicator, ProcessPlanInstance previousPlan) {
-        int version;
-        // previous rm exists
-        version = previousPlan.getVersion() + 1;
         ProcessInstance previousProcessInstance = processInstanceService.getProcessInstance(context.getTenant(), previousPlan.getProcessInstanceId());
         log.debug("previous route map(incompletePlan) process instance");
         log.debug("previous RM process instance id {}", previousPlan.getProcessInstanceId());
@@ -362,7 +388,7 @@ public class RouteMapService {
                         if (this.isDepStepCompleted(context.getTenant(), previousProcessInstance)) {
                             log.debug("Departure event is received for the origin stations of baseline rm. ignoring the current rm.");
                             // ignore process instance
-                            return;
+                            return false;
                         }
                         log.debug("'DEP' is not received at origin :{}", previousProcessInstance.getMetadata().get("origin"));
                     }
@@ -374,19 +400,8 @@ public class RouteMapService {
                 ProcessPlanInstance cancelledPlan = cancelPlan(context.getTenant(), previousPlan);
                 context.setProperty("cancelled-plan", cancelledPlan); // can be done much better TODO
                 context.setProperty("cancelled-process-instance", previousProcessInstance);
-
-                if (incompletePlan == null) {
-                    log.debug("creating a new incompletePlan after earlier incompletePlan cancellation");
-                    incompletePlan = getProcessPlanInstance(currentProcessInstance, context, version);
-                } else {
-                    incompletePlan.setVersion(version);
-                    incompletePlan.setPlanNumber(version);
-                    incompletePlan.setStatus(status);
-                    incompletePlan.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
-                }
-                ProcessPlanInstance plan = createPlan(context.getTenant(), incompletePlan, shipmentIndicator, context.getProcessInstance());
-                context.setProcessPlanInstance(plan);
-                return;
+                // create new process plan
+                return true;
             }
         }
         boolean quantitySame = this.isQuantitySame(currentProcessInstance, previousProcessInstance);
@@ -396,13 +411,14 @@ public class RouteMapService {
             if (!"C".equals(shipmentIndicator)) {
                 //non Cargo iQ shipment handling
                 log.debug("non cargo iq shipment handling.");
-                return;
+                return false;
             }
             if (!quantitySame) {
                 if (!this.isDepStepCompleted(context.getTenant(), previousProcessInstance)) {
                     if (!this.isDepStepPlanTimeExpired(context.getTenant(), previousProcessInstance)) {
                         log.debug("update RM and create RMP with U (summary section only)");
-                        ProcessPlanInstance processPlanInstance = updatePlan(shipmentIndicator, context.getTenant(), previousPlan, currentProcessInstance, false, quantitySame, anyOtherDifferencesExists);
+                        ProcessPlanInstance processPlanInstance = updatePlan(shipmentIndicator, context.getTenant(),
+                                previousPlan, currentProcessInstance);
                         context.setProcessPlanInstance(processPlanInstance);
                     }
                 }
@@ -410,21 +426,30 @@ public class RouteMapService {
             if (!anyOtherDifferencesExists) {
                 // process stops;
                 log.debug("no other information is different. process stops");
-                return;
+                return false;
             }
             ProcessPlanInstance replan = replan(context.getTenant(), previousPlan, currentProcessInstance, shipmentIndicator);
             context.setProcessPlanInstance(replan);
-            return;
+            return false;
         }
 
-
-        ProcessPlanInstance processPlanInstance = updatePlan(shipmentIndicator, context.getTenant(), previousPlan, currentProcessInstance,
-                true, quantitySame, anyOtherDifferencesExists);
+        previousPlan.setPlanNumber(previousPlan.getPlanNumber() + 1);
+        previousPlan.setVersion(previousPlan.getVersion() + 1);
+        ProcessPlanInstance processPlanInstance = updatePlan(shipmentIndicator, context.getTenant(), previousPlan, currentProcessInstance
+        );
         context.setProcessPlanInstance(processPlanInstance);
+        return false;
     }
 
-    private ProcessPlanInstance getProcessPlanInstance(ProcessInstance processInstance, Context context, int version) {
-        String status = processInstance.isComplete() ? com.aktimetrix.service.planner.Constants.STATUS_ORIGINAL : com.aktimetrix.service.planner.Constants.STATUS_CREATED;
+    /**
+     * @param processInstance
+     * @param context
+     * @param version
+     * @return
+     */
+    private ProcessPlanInstance createProcessPlanInstance(ProcessInstance processInstance, Context context, int version) {
+        String status = processInstance.isComplete() ? com.aktimetrix.service.planner.Constants.STATUS_ORIGINAL :
+                com.aktimetrix.service.planner.Constants.STATUS_CREATED;
         String completeInd = processInstance.isComplete() ? "Y" : "N";
         return new ProcessPlanInstance(context.getTenant(), processInstance.getId(), processInstance.getProcessCode(), processInstance.getProcessType(),
                 LocalDateTime.now(ZoneOffset.UTC), "Y", status,
@@ -440,8 +465,8 @@ public class RouteMapService {
      * @param processInstance
      * @return
      */
-    private ProcessPlanInstance createPlan(String tenant, ProcessPlanInstance processPlanInstance, String shipmentIndicator, ProcessInstance
-            processInstance) {
+    private ProcessPlanInstance createPlan(String tenant, ProcessPlanInstance processPlanInstance,
+                                           String shipmentIndicator, ProcessInstance processInstance) {
         if (!"C".equals(shipmentIndicator)) {
             //non Cargo iQ shipment handling
             log.debug("non cargo iq shipment handling.");
@@ -469,6 +494,11 @@ public class RouteMapService {
         return this.planner.createPlan(tenant, processPlanInstance);
     }
 
+    /**
+     * @param tenant
+     * @param previousPlan
+     * @return
+     */
     private ProcessPlanInstance cancelPlan(String tenant, ProcessPlanInstance previousPlan) {
         previousPlan.setStatus("Cancelled");
         previousPlan.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
@@ -486,14 +516,10 @@ public class RouteMapService {
      * @param tenant
      * @param plan
      * @param processInstance
-     * @param updatePlanNumber
-     * @param quantitySame
-     * @param anyOtherDifferencesExists
      * @return
      */
     private ProcessPlanInstance updatePlan(String shipmentIndicator, String tenant, ProcessPlanInstance plan,
-                                           ProcessInstance processInstance, boolean updatePlanNumber,
-                                           boolean quantitySame, boolean anyOtherDifferencesExists) {
+                                           ProcessInstance processInstance) {
         if (!"C".equals(shipmentIndicator)) {
             //non Cargo iQ shipment handling
             log.debug("non cargo iq shipment handling.");
@@ -507,10 +533,10 @@ public class RouteMapService {
         plan.setApprovedIndicator(approvedIndicator);
         plan.setFlightSpecificIndicator("F");
         plan.setPhaseNumber("1");
-        if (updatePlanNumber) {
+       /* if (updatePlanNumber) {
             plan.setPlanNumber(plan.getPlanNumber() + 1);
             plan.setVersion(plan.getVersion() + 1);
-        }
+        }*/
         log.debug("Update the existing plan by pointing it to new process instance.");
         plan.setProcessInstanceId(processInstance.getId()); // only pieces/weight/volume is updated
         // get Planned Measurements for each step for the latest process instance

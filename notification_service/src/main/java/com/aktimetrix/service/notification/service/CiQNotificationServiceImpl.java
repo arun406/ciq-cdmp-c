@@ -33,8 +33,12 @@ public class CiQNotificationServiceImpl implements CiQNotificationService {
 
     @Autowired
     private CiQCAN12MessageGenerator ciQCAN12MessageGenerator;
+    /**
+     * @Qualifier("SFTPNotifier")
+     * @Autowired private Notifier notifier;
+     */
 
-    @Qualifier("SFTPNotifier")
+    @Qualifier("S3Notifier")
     @Autowired
     private Notifier notifier;
 
@@ -47,7 +51,7 @@ public class CiQNotificationServiceImpl implements CiQNotificationService {
         }
         Notification rmpNotification = new Notification(CIQ_NOTIFICATION_TYPE_RMP);
         rmpNotification.setData(ciQMessage);
-//        this.notifier.sendNotification(rmpNotification);
+        this.notifier.sendNotification(rmpNotification);
     }
 
     @Override
@@ -64,7 +68,7 @@ public class CiQNotificationServiceImpl implements CiQNotificationService {
         }
         Notification rmpNotification = new Notification(CIQ_NOTIFICATION_TYPE_CAN);
         rmpNotification.setData(ciQMessage);
-//        this.notifier.sendNotification(rmpNotification);
+        this.notifier.sendNotification(rmpNotification);
     }
 
     @Override

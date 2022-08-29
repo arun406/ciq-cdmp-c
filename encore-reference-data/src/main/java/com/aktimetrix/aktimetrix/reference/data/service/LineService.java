@@ -40,9 +40,11 @@ public class LineService {
                     line.setFWB(dto.getFWB());
                     line.setLAT(dto.getLAT());
                     line.setRCS(dto.getRCS());
+                    line.setFOW(dto.getFOW());
                     line.setDEP(dto.getDEP());
                     line.setARR(dto.getARR());
                     line.setAWR(dto.getAWR());
+                    line.setFIW(dto.getFIW());
                     line.setRCF(dto.getRCF());
                     line.setNFD(dto.getNFD());
                     line.setAWD(dto.getAWD());
@@ -80,9 +82,11 @@ public class LineService {
         line.setFWB(dto.getFWB());
         line.setLAT(dto.getLAT());
         line.setRCS(dto.getRCS());
+        line.setFOW(dto.getFOW());
         line.setDEP(dto.getDEP());
         line.setARR(dto.getARR());
         line.setAWR(dto.getAWR());
+        line.setFIW(dto.getFIW());
         line.setRCF(dto.getRCF());
         line.setNFD(dto.getNFD());
         line.setAWD(dto.getAWD());
@@ -123,9 +127,11 @@ public class LineService {
                     dto.setFWB(m.getFWB());
                     dto.setLAT(m.getLAT());
                     dto.setRCS(m.getRCS());
+                    dto.setFOW(m.getFOW());
                     dto.setDEP(m.getDEP());
                     dto.setARR(m.getARR());
                     dto.setAWR(m.getAWR());
+                    dto.setFIW(m.getFIW());
                     dto.setRCF(m.getRCF());
                     dto.setNFD(m.getNFD());
                     dto.setAWD(m.getAWD());

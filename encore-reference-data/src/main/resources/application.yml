@@ -14,8 +14,8 @@ spring:
     name: aktimetrix-ref-data
   data:
     mongodb:
-      database: ${AKTIMETRIX_DATABASE_NAME:encore}
-      uri: ${DOCUMENT_DATABASE_URI:}
+      database: ${DATABASE_NAME:encore}
+      uri: ${DATABASE_URI:}
   servlet:
     multipart:
       enabled: true

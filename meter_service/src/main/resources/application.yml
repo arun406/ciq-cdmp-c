@@ -1,26 +1,19 @@
 server:
-  port: '6060'
+  port: ${SERVER_PORT:6060}
 spring:
   application:
     name: meter
   data:
     mongodb:
-      database: meter
-      uri: mongodb+srv://admin:admin%40123@aruncluster.70orz.mongodb.net/?retryWrites=true&w=majority
+      database: ${DATABASE_NAME:meter}
+      uri: ${DATABASE_URI:}
   kafka:
     properties:
-      sasl:
-        jaas:
-          config: org.apache.kafka.common.security.plain.PlainLoginModule   required
-            username='7I2IL2UTBVQG4MN7'   password='xdCW7HbRg0JEOOsSJMm/ljYy08JebRYTCrx9E2BfMv6XnFRw7GNTZIAE5B3uBbsA';
-        mechanism: PLAIN
       session:
         timeout:
           ms: '45000'
-      security:
-        protocol: SASL_SSL
       bootstrap:
-        servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
+        servers: ${KAFKA_BOOTSTRAP_SERVERS:}
   cloud:
     stream:
       function:
@@ -52,11 +45,11 @@ logging:
 aktimetrix:
   consumer:
     process:
-      enabled: false
+      enabled: true
     step:
       enabled: true
     measurement:
-      enabled: false
+      enabled: true
   meter:
     process-code: DEFAULT
     process-type: DEFAULT
