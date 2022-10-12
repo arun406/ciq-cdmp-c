@@ -43,9 +43,9 @@ logging:
   level:
     com.aktimetrix: DEBUG
 aws:
-  access-key-id: ${AWS_ACCESS_KEY_ID:AKIA2ZMRLVM7ON5XBVGW}
+  access-key-id: ${AWS_ACCESS_KEY_ID:}
   profile: aktimetrix
   region: ${AWS_REGION:ap-south-1}
   s3:
     bucket-name: ${AWS_S3_BUCKET_NAME:aktimetrix-encore-bucket}
-  secret-access-key: ${AWS_SECRET_ACCESS_KEY:0BsqX4zws/u7pJc73B1p6UWlO0C+keygQen4LE5O}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
