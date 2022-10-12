@@ -3,6 +3,10 @@ package com.aktimetrix.service.planner.service;
 import com.aktimetrix.core.model.MeasurementInstance;
 import com.aktimetrix.core.model.StepInstance;
 import com.aktimetrix.core.service.MeasurementInstanceService;
+import com.aktimetrix.service.planner.service.calculator.FWBPiecesDeviationCalculator;
+import com.aktimetrix.service.planner.service.calculator.FWBTimeDeviationCalculator;
+import com.aktimetrix.service.planner.service.calculator.FWBVolumeDeviationCalculator;
+import com.aktimetrix.service.planner.service.calculator.FWBWeightDeviationCalculator;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,7 +16,6 @@ import java.util.stream.Collectors;
 public class FWBStepService {
 
     private MeasurementInstanceService measurementInstanceService;
-
 
     public FWBStepService(MeasurementInstanceService measurementInstanceService) {
         this.measurementInstanceService = measurementInstanceService;

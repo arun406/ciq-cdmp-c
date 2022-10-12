@@ -1,19 +1,17 @@
-package com.aktimetrix.service.planner.service;
+package com.aktimetrix.service.planner.processor;
 
-import com.aktimetrix.core.api.Constants;
 import com.aktimetrix.core.api.Context;
+import com.aktimetrix.core.impl.publisher.ProcessPlanInstancePublisher;
 import com.aktimetrix.core.model.ProcessInstance;
-import com.aktimetrix.core.service.AbstractProcessInstanceProcessor;
 import com.aktimetrix.core.service.ProcessInstanceService;
-import com.aktimetrix.core.service.RegistryService;
-import com.aktimetrix.core.stereotypes.Processor;
+import com.aktimetrix.service.planner.service.RouteMapService;
 import com.aktimetrix.service.planner.transferobjects.Itinerary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,15 +22,17 @@ import java.util.List;
  * @author Arun.Kandakatla
  */
 @Slf4j
-@Component
-@Processor(processCode = Constants.PROCESS_INSTANCE_CREATE, processType = Constants.PROCESS_INSTANCE_TYPE)
+@Service
+@com.aktimetrix.core.stereotypes.Processor(processType = "core",
+        processCode = {"process-instance-created", "process-instance-updated"})
 public class CiQProcessCreateProcessor extends AbstractProcessInstanceProcessor {
 
     private final RouteMapService routeMapService;
 
-    public CiQProcessCreateProcessor(RegistryService registryService, ProcessInstanceService processInstanceService,
-                                     ObjectMapper objectMapper, RouteMapService routeMapService) {
-        super(registryService, processInstanceService, objectMapper);
+    public CiQProcessCreateProcessor(ProcessInstanceService processInstanceService, ObjectMapper objectMapper,
+                                     ProcessPlanInstancePublisher processPlanInstancePublisher,
+                                     RouteMapService routeMapService) {
+        super(processInstanceService, objectMapper, processPlanInstancePublisher);
         this.routeMapService = routeMapService;
     }
 

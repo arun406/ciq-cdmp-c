@@ -23,7 +23,7 @@ public class ProcessPlanCreatedEventHandler implements com.aktimetrix.core.api.E
         ProcessPlanDTO plan = (ProcessPlanDTO) event.getEntity();
         log.debug("plan : {} ", plan);
         if ("C".equals(plan.getShipmentIndicator())) {
-            ciQNotificationService.sendRMP(plan);
+            this.ciQNotificationService.sendRMP(plan);
         }
     }
 }

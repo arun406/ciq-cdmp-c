@@ -1,4 +1,4 @@
-package com.aktimetrix.service.processor.ciq.cdmpc.service;
+package com.aktimetrix.service.processor.ciq.cdmpc.processor;
 
 import com.aktimetrix.core.api.Constants;
 import com.aktimetrix.core.api.Context;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@Processor(processCode = "FWB", processType = "CiQ")
+@Processor(processType = "CiQ", processCode = "FWB", version = "16")
 public class CiQA2AFWBProcessor implements com.aktimetrix.core.api.Processor {
 
     private ProcessInstanceService processInstanceService;
@@ -75,7 +75,7 @@ public class CiQA2AFWBProcessor implements com.aktimetrix.core.api.Processor {
     public void executePostProcessors(Context context) {
         log.debug("executing post processors");
         try {
-            final PostProcessor siPublisher = registryService.getPostProcessor("SI_PUBLISHER");
+            final PostProcessor siPublisher = this.registryService.getPostProcessor("SI_PUBLISHER");
             siPublisher.process(context);
         } catch (PostProcessorNotFoundException | MultiplePostProcessFoundException e) {
             log.error(e.getMessage(), e);

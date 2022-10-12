@@ -9,8 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+
 @Slf4j
+@Component
 @EventHandler(eventType = Constants.PLAN_EVENT, eventCode = Constants.PLAN_CANCELLED, version = Constants.DEFAULT_VERSION)
 public class ProcessPlanCancelledEventHandler implements com.aktimetrix.core.api.EventHandler {
 
@@ -23,7 +24,7 @@ public class ProcessPlanCancelledEventHandler implements com.aktimetrix.core.api
         ProcessPlanDTO plan = (ProcessPlanDTO) event.getEntity();
         log.debug("plan : {} ", plan);
         if ("C".equals(plan.getShipmentIndicator())) {
-            ciQNotificationService.sendCAN(plan);
+            this.ciQNotificationService.sendCAN(plan);
         }
     }
 }

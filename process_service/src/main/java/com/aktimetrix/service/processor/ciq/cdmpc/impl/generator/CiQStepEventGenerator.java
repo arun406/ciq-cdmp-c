@@ -1,7 +1,7 @@
-package com.aktimetrix.service.processor.ciq.cdmpc.service;
+package com.aktimetrix.service.processor.ciq.cdmpc.impl.generator;
 
 import com.aktimetrix.core.api.Context;
-import com.aktimetrix.core.impl.StepEventGenerator;
+import com.aktimetrix.core.impl.generator.StepEventGenerator;
 import com.aktimetrix.core.transferobjects.Event;
 import com.aktimetrix.core.transferobjects.StepInstanceDTO;
 import lombok.extern.slf4j.Slf4j;

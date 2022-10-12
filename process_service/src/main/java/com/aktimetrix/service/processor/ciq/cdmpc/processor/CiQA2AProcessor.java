@@ -1,4 +1,4 @@
-package com.aktimetrix.service.processor.ciq.cdmpc.service;
+package com.aktimetrix.service.processor.ciq.cdmpc.processor;
 
 import com.aktimetrix.core.api.Constants;
 import com.aktimetrix.core.api.Context;
@@ -7,11 +7,15 @@ import com.aktimetrix.core.api.PostProcessor;
 import com.aktimetrix.core.exception.DefinitionNotFoundException;
 import com.aktimetrix.core.exception.MultiplePostProcessFoundException;
 import com.aktimetrix.core.exception.PostProcessorNotFoundException;
-import com.aktimetrix.core.impl.AbstractProcessor;
+import com.aktimetrix.core.impl.publisher.ProcessInstancePublisher;
+import com.aktimetrix.core.impl.publisher.StepInstancePublisher;
 import com.aktimetrix.core.model.ProcessInstance;
 import com.aktimetrix.core.model.StepInstance;
 import com.aktimetrix.core.referencedata.model.ProcessDefinition;
 import com.aktimetrix.core.referencedata.model.StepDefinition;
+import com.aktimetrix.core.service.ProcessInstanceService;
+import com.aktimetrix.core.service.RegistryService;
+import com.aktimetrix.core.service.StepInstanceService;
 import com.aktimetrix.core.stereotypes.Processor;
 import com.aktimetrix.service.processor.ciq.cdmpc.event.transferobjects.Cargo;
 import com.aktimetrix.service.processor.ciq.cdmpc.event.transferobjects.Itinerary;
@@ -23,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -35,19 +39,15 @@ import java.util.stream.Collectors;
 /**
  * @author arun kumar kandakatla
  */
-@Component
-@Processor(processType = "CiQ", processCode = "A2ATRANSPORT", version = "14")
 @Slf4j
-public class CiQA2AProcessor extends AbstractProcessor {
+@Service
+@Processor(processType = "CiQ", processCode = "A2ATRANSPORT", version = "14")
+public class CiQA2AProcessor extends AbstractBusinessProcessor {
 
     public static final String DEP_T = "DEP-T";
     public static final String FUNCTIONAL_CTX_EXPORT = "E";
     public static final String FUNCTIONAL_CTX_IMPORT = "I";
     public static final String FUNCTIONAL_CTX_TRANSIT = "T";
-
-    public CiQA2AProcessor() {
-        super();
-    }
 
     @Autowired
     private ItineraryUtilService itineraryService;
@@ -66,6 +66,16 @@ public class CiQA2AProcessor extends AbstractProcessor {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ProcessInstancePublisher processInstancePublisher;
+
+    @Autowired
+    private StepInstancePublisher stepInstancePublisher;
+
+    public CiQA2AProcessor(StepInstanceService stepInstanceService, ProcessInstanceService processInstanceService, RegistryService registryService) {
+        super(stepInstanceService, processInstanceService, registryService);
+    }
+
     /**
      * provides CiQ Domain specific metadata
      *
@@ -74,7 +84,7 @@ public class CiQA2AProcessor extends AbstractProcessor {
      */
     @Override
     protected Map<String, Object> getStepMetadata(Context context) {
-        final Itinerary itinerary = itineraryService.getItineraryFromContext(context);
+        final Itinerary itinerary = this.itineraryService.getItineraryFromContext(context);
         return this.stepMetadataProvider.getMetadata(itinerary);
     }
 
@@ -401,12 +411,10 @@ public class CiQA2AProcessor extends AbstractProcessor {
             PostProcessor completenessChecker = registryService.getPostProcessor("COMPLETE_CHECKER");
             log.debug("pi completeness checker found {}", completenessChecker.getClass().getCanonicalName());
             completenessChecker.process(context);
-            PostProcessor piPublisher = registryService.getPostProcessor("PI_PUBLISHER");
-            log.debug("pi publisher found {}", piPublisher.getClass().getCanonicalName());
-            piPublisher.process(context);
-            PostProcessor siPublisher = registryService.getPostProcessor("SI_PUBLISHER");
-            log.debug("si publisher found {}", siPublisher.getClass().getCanonicalName());
-            siPublisher.process(context);
+
+            stepInstancePublisher.publish(context);
+
+            processInstancePublisher.publish(context);
         } catch (PostProcessorNotFoundException | MultiplePostProcessFoundException e) {
             log.debug(e.getMessage(), e);
         }

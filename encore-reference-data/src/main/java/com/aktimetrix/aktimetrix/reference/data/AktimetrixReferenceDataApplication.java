@@ -12,5 +12,4 @@ public class AktimetrixReferenceDataApplication {
     public static void main(String[] args) {
         SpringApplication.run(AktimetrixReferenceDataApplication.class, args);
     }
-
 }

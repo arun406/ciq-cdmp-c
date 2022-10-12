@@ -43,7 +43,7 @@ public class PlannerApplication {
 
             try {
                 //
-                EventHandler eventHandler = this.registryService.getEventHandler(event.getEventType(), event.getEventCode());
+                EventHandler eventHandler = this.registryService.getEventHandler(Constants.PROCESS_EVENT, event.getEventCode());
                 eventHandler.handle(event);
             } catch (EventHandlerNotFoundException | MultipleEventHandlersFoundException e) {
                 logger.error(e.getLocalizedMessage(), e);
@@ -58,7 +58,7 @@ public class PlannerApplication {
             final Measurement dto = event.getEntity();
             logger.debug("measurement event received {}", dto);
             try {
-                EventHandler eventHandler = this.registryService.getEventHandler(event.getEventType(), event.getEventCode());
+                EventHandler eventHandler = this.registryService.getEventHandler(Constants.MEASUREMENT_EVENT, event.getEventCode());
                 eventHandler.handle(event);
             } catch (EventHandlerNotFoundException | MultipleEventHandlersFoundException e) {
                 logger.error(e.getLocalizedMessage(), e);

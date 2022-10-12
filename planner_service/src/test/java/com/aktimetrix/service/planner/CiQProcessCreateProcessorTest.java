@@ -11,7 +11,7 @@ import com.aktimetrix.core.repository.ProcessPlanRepository;
 import com.aktimetrix.core.service.MeasurementInstanceService;
 import com.aktimetrix.core.service.ProcessInstanceService;
 import com.aktimetrix.service.planner.api.Planner;
-import com.aktimetrix.service.planner.service.CiQProcessCreateProcessor;
+import com.aktimetrix.service.planner.processor.CiQProcessCreateProcessor;
 import com.aktimetrix.service.planner.service.RouteMapService;
 import com.aktimetrix.service.planner.transferobjects.*;
 import com.google.common.collect.ArrayListMultimap;

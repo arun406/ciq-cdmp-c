@@ -1,4 +1,4 @@
-package com.aktimetrix.service.planner.event;
+package com.aktimetrix.service.planner.event.handler.measurement;
 
 import com.aktimetrix.core.impl.DefaultContext;
 import com.aktimetrix.core.model.MeasurementInstance;
@@ -9,12 +9,12 @@ import com.aktimetrix.core.stereotypes.EventHandler;
 import com.aktimetrix.core.transferobjects.Event;
 import com.aktimetrix.core.transferobjects.Measurement;
 import com.aktimetrix.service.planner.Constants;
-import com.aktimetrix.service.planner.service.FWBStepInstanceProcessor;
+import com.aktimetrix.service.planner.processor.FWBStepInstanceProcessor;
 import com.aktimetrix.service.planner.service.RouteMapService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -22,8 +22,8 @@ import java.util.List;
  * @author Arun.Kandakatla
  */
 @Slf4j
+@Service
 @RequiredArgsConstructor
-@Component
 @EventHandler(eventType = Constants.MEASUREMENT_EVENT, eventCode = Constants.CREATED)
 public class MeasurementCreatedEventHandler implements com.aktimetrix.core.api.EventHandler {
 
@@ -62,7 +62,7 @@ public class MeasurementCreatedEventHandler implements com.aktimetrix.core.api.E
             final String processInstanceId = measurementInstance.getProcessInstanceId();
             log.info("step code :{}, step instance id : {}, process instance id: {} ",
                     stepCode, stepInstanceId, processInstanceId);
-            if ("FWB".equals(stepCode)) {
+            if ("FWB".equals(stepCode)) { //TODO
                 new FWBStepInstanceProcessor().process(context);
             }
         }

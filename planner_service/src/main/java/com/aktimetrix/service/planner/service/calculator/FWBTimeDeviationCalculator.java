@@ -1,4 +1,4 @@
-package com.aktimetrix.service.planner.service;
+package com.aktimetrix.service.planner.service.calculator;
 
 import com.aktimetrix.core.model.MeasurementInstance;
 import com.aktimetrix.service.planner.api.DeviationCalculator;

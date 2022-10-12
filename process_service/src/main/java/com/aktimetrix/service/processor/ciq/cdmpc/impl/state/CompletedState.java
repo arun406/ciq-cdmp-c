@@ -1,4 +1,4 @@
-package com.aktimetrix.service.processor.ciq.cdmpc.impl;
+package com.aktimetrix.service.processor.ciq.cdmpc.impl.state;
 
 import com.aktimetrix.core.api.Context;
 import com.aktimetrix.core.api.ProcessInstanceState;

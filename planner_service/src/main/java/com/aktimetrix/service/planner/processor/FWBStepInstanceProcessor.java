@@ -1,4 +1,4 @@
-package com.aktimetrix.service.planner.service;
+package com.aktimetrix.service.planner.processor;
 
 import com.aktimetrix.core.api.Context;
 import com.aktimetrix.core.api.Processor;
@@ -10,6 +10,7 @@ import com.aktimetrix.core.service.MeasurementInstanceService;
 import com.aktimetrix.core.service.ProcessInstanceService;
 import com.aktimetrix.service.planner.Constants;
 import com.aktimetrix.service.planner.api.Planner;
+import com.aktimetrix.service.planner.service.FWBStepService;
 import com.google.common.collect.ArrayListMultimap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@com.aktimetrix.core.stereotypes.Processor(processType = "CiQ", processCode = {"fwb-step-instance"})
 public class FWBStepInstanceProcessor implements Processor {
 
     private ProcessInstanceService processInstanceService;
